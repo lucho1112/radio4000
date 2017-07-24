@@ -16,9 +16,7 @@
 		{{/modal-dialog}}
 	{{/if}}
 
-	{{!--
-	{{jets-search contentTag=".List" content=tracks}}
-	--}}
+	{{!-- {{jets-search contentTag=".List" content=tracks}} --}}
 
 	{{#unless tracks.isLoaded}}
 		<div class="Container Section--space">
@@ -34,7 +32,7 @@
 		{{/unless}}
 	{{/unless}}
 
-	{{#tracks-list items=tracks numbered=false as |item|}}
+	{{#tracks-list items=tracks grouped=true numbered=false as |item|}}
 		{{track-item
 			track=item
 			canEdit=canEdit

@@ -2,9 +2,11 @@ import Ember from 'ember';
 import DS from 'ember-data';
 import {validator, buildValidations} from 'ember-cp-validations';
 import youtubeUrlToId from 'radio4000/utils/youtube-url-to-id';
+import firebase from 'firebase';
+import format from 'npm:date-fns/format';
 
 const {Model, attr, belongsTo} = DS;
-const {get, set} = Ember;
+const {get, set, computed} = Ember;
 
 export const Validations = buildValidations({
 	url: [
@@ -34,8 +36,12 @@ export const Validations = buildValidations({
 export default Model.extend(Validations, {
 	created: attr('number', {
 		defaultValue() {
-			return new Date().getTime();
+			return firebase.database.ServerValue.TIMESTAMP;
 		}
+	}),
+	createdMonth: computed('created', function () {
+		let created = get(this, 'created');
+		return format(created, 'MMMM YYYY');
 	}),
 	url: attr('string'),
 	title: attr('string'),
@@ -50,7 +56,8 @@ export default Model.extend(Validations, {
 
 	// Own properties
 	// property for local use only, not planned to save them
-	usedInCurrentPlayer: false,
+	liveInCurrentPlayer: false,
+	playedInCurrentPlayer: false,
 	finishedInCurrentPlayer: false,
 
 	// If the user changes the url, we need to update the YouTube id.

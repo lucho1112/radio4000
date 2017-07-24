@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import {task} from 'ember-concurrency';
+import firebase from 'firebase';
 
 const {Mixin, debug, get} = Ember;
 
@@ -18,9 +19,9 @@ export default Mixin.create({
 			url: props.url,
 			title: props.title,
 			body: props.body,
-			ytid: props.ytid
+			ytid: props.ytid,
+			channel
 		});
-		track.set('channel', channel);
 
 		try {
 			yield track.save();
@@ -31,14 +32,19 @@ export default Mixin.create({
 
 		try {
 			const tracks = yield channel.get('tracks');
+			const timestamp = firebase.database.ServerValue.TIMESTAMP;
 			tracks.addObject(track);
-			channel.set('updated', new Date().getTime());
+			channel.set('updated', timestamp);
 			yield channel.save();
 			get(this, 'flashMessages').info('Your track was created', {timeout: 5000});
 		} catch (e) {
 			Ember.debug(e);
 			flashMessages.warning('Could not save the track to your radio');
 		}
+
+		// To avoid 'updated' being NaN due to a value of {.sv: "timestamp"}
+		// we need to request an update from Firebase.
+		channel.reload();
 
 		return track;
 	}).drop()
